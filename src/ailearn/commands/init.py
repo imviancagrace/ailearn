@@ -98,7 +98,8 @@ def init(
         ailearn_dir / "sessions",
         ailearn_dir / "recaps",
         ailearn_dir / "agents" / "claude" / "commands",
-        ailearn_dir / "agents" / "cursor",
+        ailearn_dir / "agents" / "cursor" / "rules",
+        ailearn_dir / "agents" / "cursor" / "commands",
     ]
     for d in dirs_to_create:
         d.mkdir(parents=True, exist_ok=True)
@@ -175,10 +176,23 @@ def _install_agent_files(agent: str, target_dir: Path, ailearn_dir: Path) -> Non
         console.print("[dim]  ✓ Claude Code: .claude/CLAUDE.md + .claude/commands/[/dim]")
 
     if agent in ("cursor", "both"):
-        # Copy .cursorrules to project root (Cursor reads it from there)
-        shutil.copy(cursor_src / ".cursorrules", target_dir / ".cursorrules")
+        # Copy project rules to .cursor/rules/ (Cursor's modern rules system)
+        cursor_rules_dest = target_dir / ".cursor" / "rules"
+        cursor_rules_dest.mkdir(parents=True, exist_ok=True)
+        shutil.copy(cursor_src / "rules" / "ailearn.mdc", cursor_rules_dest / "ailearn.mdc")
 
-        # Keep a copy in .ailearn/agents/cursor/
-        shutil.copy(cursor_src / ".cursorrules", ailearn_dir / "agents" / "cursor" / ".cursorrules")
+        # Copy slash commands to .cursor/commands/ so /ailearn.plan etc. work natively
+        cursor_commands_dest = target_dir / ".cursor" / "commands"
+        cursor_commands_dest.mkdir(parents=True, exist_ok=True)
+        for cmd_file in (cursor_src / "commands").iterdir():
+            shutil.copy(cmd_file, cursor_commands_dest / cmd_file.name)
 
-        console.print("[dim]  ✓ Cursor: .cursorrules[/dim]")
+        # Keep copies in .ailearn/agents/cursor/ as source of truth
+        ailearn_cursor_dir = ailearn_dir / "agents" / "cursor"
+        (ailearn_cursor_dir / "rules").mkdir(exist_ok=True)
+        (ailearn_cursor_dir / "commands").mkdir(exist_ok=True)
+        shutil.copy(cursor_src / "rules" / "ailearn.mdc", ailearn_cursor_dir / "rules" / "ailearn.mdc")
+        for cmd_file in (cursor_src / "commands").iterdir():
+            shutil.copy(cmd_file, ailearn_cursor_dir / "commands" / cmd_file.name)
+
+        console.print("[dim]  ✓ Cursor: .cursor/rules/ailearn.mdc + .cursor/commands/[/dim]")
