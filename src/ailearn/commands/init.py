@@ -63,23 +63,51 @@ def init(
     console.print(f"\n[dim]Scaffolding into:[/dim] [bold]{target_dir}[/bold]\n")
 
     # --- Interactive prompts ---
-    dev_name: str = questionary.text("What's your first name?").ask()
-
     skill_level: str = questionary.select(
         "What's your current skill level?",
         choices=[
-            questionary.Choice("Junior (0–2 years, learning fundamentals)", value="junior"),
-            questionary.Choice("Early-Mid (2–4 years, building confidence)", value="early-mid"),
+            questionary.Choice("Junior (0–2 years, learning fundamentals)", value="Junior"),
+            questionary.Choice("Early-Mid (2–4 years, building confidence)", value="Early-Mid"),
         ],
     ).ask()
 
-    stack: str = questionary.text(
-        "What's your primary tech stack?",
-        instruction="(e.g. Python, FastAPI, PostgreSQL)",
+    project_type: str = questionary.select(
+        "Is this a new or existing project?",
+        choices=[
+            questionary.Choice("New project", value="new"),
+            questionary.Choice("Existing project", value="existing"),
+        ],
     ).ask()
 
-    project_description: str = questionary.text(
-        "Describe this project in 1–2 sentences.",
+    if project_type == "new":
+        project_description: str = questionary.text(
+            "Describe the project in 1–2 sentences.",
+        ).ask()
+    else:
+        project_description: str = (
+            questionary.text(
+                "Any additional context for the agent?",
+                instruction="(optional — press Enter to skip)",
+            ).ask()
+            or ""
+        )
+
+    preferred_language: str = (
+        questionary.text(
+            "When explaining language-agnostic concepts, which language should examples use?",
+            instruction="(e.g. Python, TypeScript — or press Enter to let the agent decide)",
+        ).ask()
+        or "No preference"
+    )
+
+    learning_style: str = questionary.select(
+        "How do you prefer the agent to explain things?",
+        choices=[
+            "Explain the concept and why before showing code",
+            "Show working code examples first, then explain",
+            "Use real-world analogies to explain technical ideas",
+            "Keep explanations brief — show the pattern, I'll figure it out",
+        ],
     ).ask()
 
     if agent is None:
@@ -97,9 +125,7 @@ def init(
     dirs_to_create = [
         ailearn_dir / "sessions",
         ailearn_dir / "recaps",
-        ailearn_dir / "agents" / "claude" / "commands",
-        ailearn_dir / "agents" / "cursor" / "rules",
-        ailearn_dir / "agents" / "cursor" / "commands",
+        ailearn_dir / "agents" / "claude",
     ]
     for d in dirs_to_create:
         d.mkdir(parents=True, exist_ok=True)
@@ -115,10 +141,11 @@ def init(
     )
     constitution_tmpl = jinja_env.get_template("constitution.md")
     constitution_content = constitution_tmpl.render(
-        name=dev_name,
         skill_level=skill_level,
-        stack=stack,
+        project_type="New" if project_type == "new" else "Existing",
         project_description=project_description,
+        preferred_language=preferred_language,
+        learning_style=learning_style,
         date=date.today().isoformat(),
     )
     (ailearn_dir / "constitution.md").write_text(constitution_content)
@@ -168,11 +195,6 @@ def _install_agent_files(agent: str, target_dir: Path, ailearn_dir: Path) -> Non
         for cmd_file in commands_src.iterdir():
             shutil.copy(cmd_file, commands_dest / cmd_file.name)
 
-        # Also keep a copy in .ailearn/agents/claude/commands/ as documentation
-        ailearn_commands = ailearn_dir / "agents" / "claude" / "commands"
-        for cmd_file in commands_src.iterdir():
-            shutil.copy(cmd_file, ailearn_commands / cmd_file.name)
-
         console.print("[dim]  ✓ Claude Code: .claude/CLAUDE.md + .claude/commands/[/dim]")
 
     if agent in ("cursor", "both"):
@@ -186,13 +208,5 @@ def _install_agent_files(agent: str, target_dir: Path, ailearn_dir: Path) -> Non
         cursor_commands_dest.mkdir(parents=True, exist_ok=True)
         for cmd_file in (cursor_src / "commands").iterdir():
             shutil.copy(cmd_file, cursor_commands_dest / cmd_file.name)
-
-        # Keep copies in .ailearn/agents/cursor/ as source of truth
-        ailearn_cursor_dir = ailearn_dir / "agents" / "cursor"
-        (ailearn_cursor_dir / "rules").mkdir(exist_ok=True)
-        (ailearn_cursor_dir / "commands").mkdir(exist_ok=True)
-        shutil.copy(cursor_src / "rules" / "ailearn.mdc", ailearn_cursor_dir / "rules" / "ailearn.mdc")
-        for cmd_file in (cursor_src / "commands").iterdir():
-            shutil.copy(cmd_file, ailearn_cursor_dir / "commands" / cmd_file.name)
 
         console.print("[dim]  ✓ Cursor: .cursor/rules/ailearn.mdc + .cursor/commands/[/dim]")

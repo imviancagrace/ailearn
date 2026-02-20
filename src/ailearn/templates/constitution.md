@@ -1,10 +1,25 @@
 # AILearn Constitution
 
-**Developer:** {{ name }}
 **Skill Level:** {{ skill_level }}
-**Primary Stack:** {{ stack }}
-**Project:** {{ project_description }}
+**Project Type:** {{ project_type }}
+**Example Language:** {{ preferred_language }}
 **Created:** {{ date }}
+
+---
+
+## Project Context
+
+{% if project_description %}
+{{ project_description }}
+{% else %}
+*(No additional context provided — the agent will read the project to determine context.)*
+{% endif %}
+
+---
+
+## Learning Style
+
+{{ learning_style }}
 
 ---
 
@@ -28,18 +43,10 @@
 
 ---
 
-## What I'm Still Shaky On
+## What I'm Shaky On
 
 > These are the areas where you want the AI to slow down and explain more.
 
 -
 -
 -
-
----
-
-## Working Style Notes
-
-> Optional: anything you want the AI to know about how you like to learn.
-> e.g. "I learn better with analogies", "Show me the wrong way first so I understand why the right way matters"
-
