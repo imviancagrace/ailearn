@@ -19,13 +19,16 @@ The plan MUST follow the AILearn Plan Format below exactly.
 
 ## Save the Plan
 
-After the plan is accepted, save it to:
+Present the plan to the user. If they request changes, revise and re-present — repeat until they explicitly confirm the plan is accepted.
+
+**Only save after the user confirms the final version.** Save it to:
 ```
 .ailearn/sessions/YYYY-MM-DD-{task-slug}/plan.md
 ```
 - Use today's date for `YYYY-MM-DD`
 - Use a short kebab-case slug of the task (e.g. `add-user-auth`, `refactor-db-layer`)
 - Create the directory if it doesn't exist
+- Always save the most recent version of the plan, not an earlier draft
 
 ## Update Profile
 
