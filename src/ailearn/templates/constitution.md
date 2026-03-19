@@ -1,6 +1,5 @@
 # AILearn Constitution
 
-**Skill Level:** {{ skill_level }}
 **Project Type:** {{ project_type }}
 **Example Language:** {{ preferred_language }}
 **Created:** {{ date }}

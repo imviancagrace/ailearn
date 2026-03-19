@@ -2,8 +2,6 @@
 
 > Ship code and build real understanding — session by session.
 
----
-
 ## The Problem
 
 You've probably felt it: you ship code that works, but you're not sure you could explain it to anyone. The AI generated it, you accepted it, and now it's in production. You're moving fast, but the understanding isn't keeping up.

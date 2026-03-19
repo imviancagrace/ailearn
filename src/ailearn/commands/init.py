@@ -16,6 +16,16 @@ console = Console()
 # Where the bundled templates live inside the installed package
 TEMPLATES_DIR = Path(__file__).parent.parent / "templates"
 
+_BANNER = """\
+[#aa2233] █████╗ ██╗██╗     ███████╗ █████╗ ██████╗ ███╗   ██╗[/#aa2233]
+[#aa2233]██╔══██╗██║██║     ██╔════╝██╔══██╗██╔══██╗████╗  ██║[/#aa2233]
+[#aa2233]███████║██║██║     █████╗  ███████║██████╔╝██╔██╗ ██║[/#aa2233]
+[#aa2233]██╔══██║██║██║     ██╔══╝  ██╔══██║██╔══██╗██║╚██╗██║[/#aa2233]
+[#aa2233]██║  ██║██║███████╗███████╗██║  ██║██║  ██║██║ ╚████║[/#aa2233]
+[#aa2233]╚═╝  ╚═╝╚═╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝[/#aa2233]
+[dim]          Building and Learning with AI[/dim]
+"""
+
 
 def init(
     project_name: Optional[str] = typer.Argument(
@@ -45,13 +55,7 @@ def init(
 ) -> None:
     """Scaffold a new AILearn project."""
 
-    console.print(
-        Panel.fit(
-            "[bold cyan]AILearn[/bold cyan] — AI-assisted learning toolkit\n"
-            "[dim]Wrapping your AI agent with structured learning[/dim]",
-            border_style="cyan",
-        )
-    )
+    console.print(_BANNER)
 
     # --- Sync mode: just redeploy agent files, nothing else ---
     if sync:
@@ -117,14 +121,6 @@ def init(
         update = action == "update"
 
     # --- Interactive prompts ---
-    skill_level: str = questionary.select(
-        "What's your current skill level?",
-        choices=[
-            questionary.Choice("Junior (0–2 years, learning fundamentals)", value="Junior"),
-            questionary.Choice("Early-Mid (2–4 years, building confidence)", value="Early-Mid"),
-        ],
-    ).ask()
-
     project_type: str = questionary.select(
         "Is this a new or existing project?",
         choices=[
@@ -154,15 +150,31 @@ def init(
         or "No preference"
     )
 
-    learning_style: str = questionary.select(
+    _LEARNING_STYLE_DEFAULT = "Explain the concept and why before showing code"
+    _CUSTOM_STYLE_SENTINEL = "__custom__"
+
+    learning_style_choice: str = questionary.select(
         "How do you prefer the agent to explain things?",
         choices=[
-            "Explain the concept and why before showing code",
-            "Show working code examples first, then explain",
-            "Use real-world analogies to explain technical ideas",
-            "Keep explanations brief — show the pattern, I'll figure it out",
+            questionary.Choice("Explain the concept and why before showing code", value="Explain the concept and why before showing code"),
+            questionary.Choice("Show working code examples first, then explain", value="Show working code examples first, then explain"),
+            questionary.Choice("Use real-world analogies to explain technical ideas", value="Use real-world analogies to explain technical ideas"),
+            questionary.Choice("Keep explanations brief — show the pattern, I'll figure it out", value="Keep explanations brief — show the pattern, I'll figure it out"),
+            questionary.Choice("Describe my learning style…", value=_CUSTOM_STYLE_SENTINEL),
         ],
     ).ask()
+
+    if learning_style_choice == _CUSTOM_STYLE_SENTINEL:
+        custom = (
+            questionary.text(
+                "Describe how you'd like the agent to explain things.",
+                instruction="(press Enter to use the default)",
+            ).ask()
+            or ""
+        ).strip()
+        learning_style = custom if custom else _LEARNING_STYLE_DEFAULT
+    else:
+        learning_style = learning_style_choice
 
     learning_goals_input: str = (
         questionary.text(
@@ -213,7 +225,6 @@ def init(
     )
     constitution_tmpl = jinja_env.get_template("constitution.md")
     constitution_content = constitution_tmpl.render(
-        skill_level=skill_level,
         project_type="New" if project_type == "new" else "Existing",
         project_description=project_description,
         preferred_language=preferred_language,
