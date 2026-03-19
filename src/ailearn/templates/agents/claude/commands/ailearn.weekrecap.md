@@ -4,14 +4,14 @@ You are generating a personalized weekly learning recap for an AILearn developer
 
 1. Read `.ailearn/constitution.md` — developer name, skill level, learning goals
 2. Read `.ailearn/profile.md` — what concepts they've encountered, mastered, and are ready to go deeper on
-3. Read ALL files matching `.ailearn/sessions/*/plan.md` — these are the sessions from this week
+3. Read all files matching `.ailearn/sessions/*/plan.md` where the session directory name starts with a date within the last 7 days (from today's date). Ignore sessions older than 7 days.
 
 ## Generate the Recap
 
 The recap should feel like a thoughtful mentor reviewing the week with the developer — not a changelog.
 
 **Rules:**
-- **Skip re-explaining** concepts already in "Concepts Mastered" in `profile.md` — assume they know it
+- **Skip re-explaining** concepts already in "Concepts Solidified" in `profile.md` — assume they know it
 - **Go one level deeper** on concepts in "Ready to Go Deeper" — surface the more advanced angle
 - **Personalize** — use the developer's name, reference actual tasks they worked on, be specific
 - **Curate ruthlessly** — don't list every concept they encountered; pick the 3–5 most important or interesting ones to surface this week
@@ -29,8 +29,9 @@ Use today's date.
 ## Update Profile
 
 After generating the recap:
-- Move any concept from "Concepts Encountered" → "Concepts Mastered" if it appeared in 2+ sessions
-- Move any concept from "Concepts Mastered" → "Ready to Go Deeper" if the recap surfaced a next-level angle for it
+- Do NOT auto-promote concepts to Solidified — promotion only happens through `/ailearn.reflect`
+- If the recap surfaced a next-level angle for a concept already in "Concepts Solidified", move it to "Ready to Go Deeper"
+- If any concept in "Concepts Encountered" has 3+ session slugs in its `applied in:` list and hasn't been moved to "Concepts Ready for Reflection" yet, move it now and mention it in the recap
 
 ---
 
